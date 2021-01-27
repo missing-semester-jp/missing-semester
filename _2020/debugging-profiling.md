@@ -1,6 +1,6 @@
 ---
 layout: lecture
-title: "Debugging and Profiling"
+title: "デバッグとプロファイリング"
 date: 2020-01-23
 ready: true
 video:
@@ -8,35 +8,51 @@ video:
   id: l812pUnKxME
 ---
 
-A golden rule in programming is that code does not do what you expect it to do, but what you tell it to do.
-Bridging that gap can sometimes be a quite difficult feat.
-In this lecture we are going to cover useful techniques for dealing with buggy and resource hungry code: debugging and profiling.
+コードはあなたが期待した動きをするのではなく、あなたが書いた通りのことをするという黄金律がプログラミングにはあります。
+その差を埋めるのはときには大変困難な芸当になる場合もあります。
+この授業では、バグっていたりリソースを消費したりするようなコードに対処するための便利なテクニック、デバッグとプロファイリングについて扱います。
 
-# Debugging
+# デバッグ
 
-## Printf debugging and Logging
+## Printfデバッグとロギング
 
-"The most effective debugging tool is still careful thought, coupled with judiciously placed print statements" — Brian Kernighan, _Unix for Beginners_.
+「最も効果的なデバッグツールは依然として、思慮深く配置されたprint文に伴った注意深い考察である」 — Brian Kernighan, _Unix for Beginners_
 
-A first approach to debug a program is to add print statements around where you have detected the problem, and keep iterating until you have extracted enough information to understand what is responsible for the issue.
+<!-- "The most effective debugging tool is still careful thought, coupled with judiciously placed print statements" — Brian Kernighan, _Unix for Beginners_. -->
 
-A second approach is to use logging in your program, instead of ad hoc print statements. Logging is better than regular print statements for several reasons:
+プログラムをデバッグする最初のアプローチは、何がこの問題に関係しているのかを理解するために必要な情報を得るまで、問題がありそうな場所にprint文を足すことを繰り返すというものです。
 
-- You can log to files, sockets or even remote servers instead of standard output.
+<!-- A first approach to debug a program is to add print statements around where you have detected the problem, and keep iterating until you have extracted enough information to understand what is responsible for the issue. -->
+
+２番めのアプローチは、逐次print文を足す代わりにロギングを利用するというものです。ロギングは普通のprint文よりも、以下のようないくつかの理由により優れています。
+
+<!-- A second approach is to use logging in your program, instead of ad hoc print statements. Logging is better than regular print statements for several reasons: -->
+
+- ログを標準出力の代わりにファイルやソケット、リモートにあるサーバーに出力できます。
+- ロギングは深刻度（INFO、DEBUG、WARN、ERRORなど）をサポートしており、出力を適切にフィルターすることができます。
+- 新しい問題が発生した際、何が悪かったのかを検出するために必要な問題がログにすでに含まれている可能性が結構あります。
+
+<!-- - You can log to files, sockets or even remote servers instead of standard output.
 - Logging supports severity levels (such as INFO, DEBUG, WARN, ERROR, &c), that allow you to filter the output accordingly.
-- For new issues, there's a fair chance that your logs will contain enough information to detect what is going wrong.
+- For new issues, there's a fair chance that your logs will contain enough information to detect what is going wrong. -->
 
-[Here](/static/files/logger.py) is an example code that logs messages:
+[これ](/static/files/logger.py) はログメッセージのサンプルコードです。
+
+<!-- [Here](/static/files/logger.py) is an example code that logs messages: -->
 
 ```bash
 $ python logger.py
 # Raw output as with just prints
+# printだけを利用した生の出力
 $ python logger.py log
 # Log formatted output
+# 整形されたログの出力
 $ python logger.py log ERROR
 # Print only ERROR levels and above
+# ERROR以上のレベルのみを表示
 $ python logger.py color
 # Color formatted output
+# 色付きの整形された出力
 ```
 
 One of my favorite tips for making logs more readable is to color code them.
@@ -429,7 +445,7 @@ Programs often run slowly when they are resource constrained, e.g. without enoug
 There are a myriad of command line tools for probing and displaying different system resources like CPU usage, memory usage, network, disk usage and so on.
 
 - **General Monitoring** - Probably the most popular is [`htop`](https://htop.dev/), which is an improved version of [`top`](https://www.man7.org/linux/man-pages/man1/top.1.html).
-`htop` presents various statistics for the currently running processes on the system. `htop` has a myriad of options and keybinds, some useful ones  are: `<F6>` to sort processes, `t` to show tree hierarchy and `h` to toggle threads. 
+`htop` presents various statistics for the currently running processes on the system. `htop` has a myriad of options and keybinds, some useful ones  are: `<F6>` to sort processes, `t` to show tree hierarchy and `h` to toggle threads.
 See also [`glances`](https://nicolargo.github.io/glances/) for similar implementation with a great UI. For getting aggregate measures across all processes, [`dstat`](http://dag.wiee.rs/home-made/dstat/) is another nifty tool that computes real-time resource metrics for lots of different subsystems like I/O, networking, CPU utilization, context switches, &c.
 - **I/O operations** - [`iotop`](https://www.man7.org/linux/man-pages/man8/iotop.8.html) displays live I/O usage information and is handy to check if a process is doing heavy I/O disk operations
 - **Disk Usage** - [`df`](https://www.man7.org/linux/man-pages/man1/df.1.html) displays metrics per partitions and [`du`](http://man7.org/linux/man-pages/man1/du.1.html) displays **d**isk **u**sage per file for the current directory. In these tools the `-h` flag tells the program to print with **h**uman readable format.
