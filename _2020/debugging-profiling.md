@@ -80,24 +80,41 @@ for R in $(seq 0 20 255); do
 done
 ```
 
-## Third party logs
+## 第三者のログ
 
-As you start building larger software systems you will most probably run into dependencies that run as separate programs.
+大きなソフトウェア・システムを構築し始めるにつれて、独立して動く他のプログラムとの依存関係の問題に直面することでしょう。
+ウェブサーバー、データベース、メッセージブローカーといったものはこのような依存関係のよくある例です。
+これらのシステムとやり取りをするときはクライアントサイドのエラーメッセージでは不十分なために、しばしばそれらのログを読む必要があります。
+
+<!-- As you start building larger software systems you will most probably run into dependencies that run as separate programs.
 Web servers, databases or message brokers are common examples of this kind of dependencies.
-When interacting with these systems it is often necessary to read their logs, since client side error messages might not suffice.
+When interacting with these systems it is often necessary to read their logs, since client side error messages might not suffice. -->
 
-Luckily, most programs write their own logs somewhere in your system.
+幸運なことに、多くのプログラムではシステムのどこかしらにログを書き込んでいます。
+UNIX システムでは、プログラムがログを `/var/log` に書くのが一般的です。
+例えば、 [NGINX](https://www.nginx.com/) ウェブサーバーはログを `/var/log/nginx` に置きます。
+より最近では様々なシステムが、すべてのログを集める場所である **システムログ** を使い始めるようになりました。
+（全てではないですが）ほとんどの Linux システムでは、有効化され実行されているサービスたちを始めとする多くのものを管理するシステムデーモン、 `systemd` を利用しています。
+`systemd` はそのログを独自のフォーマットで `/var/log/journal` に置き、あなたは [`journalctl`](https://www.man7.org/linux/man-pages/man1/journalctl.1.html) コマンドを使うことでメッセージを表示することができます。
+同様に、 macOS では依然として `/var/log/system.log` が存在しますが、徐々にシステムログを利用するツールの数は増えており、 [`log show`](https://www.manpagez.com/man/1/log/) で表示することができます。
+ほとんどの UNIX システムでは [`dmesg`](https://www.man7.org/linux/man-pages/man1/dmesg.1.html) コマンドを利用してカーネルのログにアクセスすることもできます。
+
+<!-- Luckily, most programs write their own logs somewhere in your system.
 In UNIX systems, it is commonplace for programs to write their logs under `/var/log`.
 For instance, the [NGINX](https://www.nginx.com/) webserver places its logs under `/var/log/nginx`.
 More recently, systems have started using a **system log**, which is increasingly where all of your log messages go.
 Most (but not all) Linux systems use `systemd`, a system daemon that controls many things in your system such as which services are enabled and running.
 `systemd` places the logs under `/var/log/journal` in a specialized format and you can use the [`journalctl`](https://www.man7.org/linux/man-pages/man1/journalctl.1.html) command to display the messages.
 Similarly, on macOS there is still `/var/log/system.log` but an increasing number of tools use the system log, that can be displayed with [`log show`](https://www.manpagez.com/man/1/log/).
-On most UNIX systems you can also use the [`dmesg`](https://www.man7.org/linux/man-pages/man1/dmesg.1.html) command to access the kernel log.
+On most UNIX systems you can also use the [`dmesg`](https://www.man7.org/linux/man-pages/man1/dmesg.1.html) command to access the kernel log. -->
 
-For logging under the system logs you can use the [`logger`](https://www.man7.org/linux/man-pages/man1/logger.1.html) shell program.
+システムログにログを取るためには、シェルプログラム [`logger`](https://www.man7.org/linux/man-pages/man1/logger.1.html) を使うことができます。
+これは `logger` を使う例と、システムログに作られたエントリーを確認する方法です。
+さらに、ほとんどのプログラミング言語ではシステムログにログを吐くためのバインディングが存在します。
+
+<!-- For logging under the system logs you can use the [`logger`](https://www.man7.org/linux/man-pages/man1/logger.1.html) shell program.
 Here's an example of using `logger` and how to check that the entry made it to the system logs.
-Moreover, most programming languages have bindings logging to the system log.
+Moreover, most programming languages have bindings logging to the system log. -->
 
 ```bash
 logger "Hello Logs"
@@ -107,11 +124,16 @@ log show --last 1m | grep Hello
 journalctl --since "1m ago" | grep Hello
 ```
 
-As we saw in the data wrangling lecture, logs can be quite verbose and they require some level of processing and filtering to get the information you want.
-If you find yourself heavily filtering through `journalctl` and `log show` you can consider using their flags, which can perform a first pass of filtering of their output.
-There are also some tools like  [`lnav`](http://lnav.org/), that provide an improved presentation and navigation for log files.
+「データの前処理」の授業で見たように、欲しい情報を得るためにはログをできる限り詳細にし、ある程度の処理とフィルタリングをすることが必要です。
+もし `journalctl` や `log show` でフィルタリングしすぎているなと思ったら、フラグを使って予め出力をフィルターすることができます。
+また、 [`lnav`](http://lnav.org/) のような、よりよい見た目やログファイル間の行き来をする機能を提供するようなツールがあります。
 
-## Debuggers
+<!-- As we saw in the data wrangling lecture, logs can be quite verbose and they require some level of processing and filtering to get the information you want.
+If you find yourself heavily filtering through `journalctl` and `log show` you can consider using their flags, which can perform a first pass of filtering of their output.
+There are also some tools like  [`lnav`](http://lnav.org/), that provide an improved presentation and navigation for log files. -->
+
+## デバッガー
+<!-- ## Debuggers -->
 
 When printf debugging is not enough you should use a debugger.
 Debuggers are programs that let you interact with the execution of a program, allowing the following:
