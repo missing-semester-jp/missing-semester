@@ -55,11 +55,19 @@ $ python logger.py color
 # 色付きの整形された出力
 ```
 
+ログを読みやすくする私のよくつかうコツのひとつとして、色を付けるというものがあります。
+これまでにおそらくすでにターミナルを読みやすくするため色が使われているのに気づいたことでしょう。これはどうすればできるのでしょうか？
+
+`ls` や `grep` のようなプログラムは、 [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code) というシェルに出力の色を変えるように伝えるための特別な文字列を利用しています。例えば `echo -e "\e[38;2;255;0;0mThis is red\e[0m"` を実行すると、ターミナルが [true color](https://gist.github.com/XVilka/8346728#terminals--true-color) をサポートしている場合は `This is red` が赤色で出力されます。 もしターミナルがそれをサポートしていなかった場合 （例えば macOS の Terminal.app）、より普遍的にサポートされている１６色のエスケープコード、例えば `echo -e "\e[31;1mThis is red\e[0m"` を使うことができます。
+
+<!--
 One of my favorite tips for making logs more readable is to color code them.
 By now you probably have realized that your terminal uses colors to make things more readable. But how does it do it?
-Programs like `ls` or `grep` are using [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code), which are special sequences of characters to indicate your shell to change the color of the output. For example, executing `echo -e "\e[38;2;255;0;0mThis is red\e[0m"` prints the message `This is red` in red on your terminal, as long as it supports [true color](https://gist.github.com/XVilka/8346728#terminals--true-color). If your terminal doesn't support this (e.g. macOS's Terminal.app), you can use the more universally supported escape codes for 16 color choices, for example `echo -e "\e[31;1mThis is red\e[0m"`.
+Programs like `ls` or `grep` are using [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code), which are special sequences of characters to indicate your shell to change the color of the output. For example, executing `echo -e "\e[38;2;255;0;0mThis is red\e[0m"` prints the message `This is red` in red on your terminal, as long as it supports [true color](https://gist.github.com/XVilka/8346728#terminals--true-color). If your terminal doesn't support this (e.g. macOS's Terminal.app), you can use the more universally supported escape codes for 16 color choices, for example `echo -e "\e[31;1mThis is red\e[0m"`. -->
 
-The following script shows how to print many RGB colors into your terminal (again, as long as it supports true color).
+以下のスクリプトは、どうやっていろいろなRGBカラーをターミナルに表示するかを表しています（ただし true color をサポートしている場合に限ります）。
+
+<!-- The following script shows how to print many RGB colors into your terminal (again, as long as it supports true color). -->
 
 ```bash
 #!/usr/bin/env bash
