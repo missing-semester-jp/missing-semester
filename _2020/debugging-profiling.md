@@ -135,29 +135,53 @@ There are also some tools like  [`lnav`](http://lnav.org/), that provide an impr
 ## デバッガー
 <!-- ## Debuggers -->
 
-When printf debugging is not enough you should use a debugger.
-Debuggers are programs that let you interact with the execution of a program, allowing the following:
+printfデバッギングが十分ではないときは、デバッガーを使うべきです。
+デバッガーは実行されているプログラムを操作するためのプログラムで、以下のような事ができます。
 
-- Halt execution of the program when it reaches a certain line.
+<!-- When printf debugging is not enough you should use a debugger.
+Debuggers are programs that let you interact with the execution of a program, allowing the following: -->
+
+- 特定の行にきたときにプログラムの実行を止める
+- １命令ずつプログラムの実行を行う
+- プログラムがクラッシュした後に変数の値を調査する
+- ある条件を満たしたときにだけ実行を止める
+- などなど他にもより発展的な機能があります
+
+<!-- - Halt execution of the program when it reaches a certain line.
 - Step through the program one instruction at a time.
 - Inspect values of variables after the program crashed.
 - Conditionally halt the execution when a given condition is met.
-- And many more advanced features
+- And many more advanced features -->
 
-Many programming languages come with some form of debugger.
-In Python this is the Python Debugger [`pdb`](https://docs.python.org/3/library/pdb.html).
+多くのプログラミング言語は何らかの形でデバッガーを備えています。
+Python では Python Debugger [`pdb`](https://docs.python.org/3/library/pdb.html) です。
 
-Here is a brief description of some of the commands `pdb` supports:
+<!-- Many programming languages come with some form of debugger.
+In Python this is the Python Debugger [`pdb`](https://docs.python.org/3/library/pdb.html). -->
 
+これは `pdb` サポートするコマンドのいくつかの簡単な紹介です。
+<!--
+Here is a brief description of some of the commands `pdb` supports: -->
+
+- **l**(ist) - 今実行している行の周り11行か、前に表示していたコードを表示します。
+- **s**(tep) - 今の行を実行し、最初の停止できる場所で止まります。
+- **n**(ext) - 現在の関数の次の行まで、もしくは今の関数からリターンするまで実行を続けます。
+- **b**(reak) - 渡した引数に応じた breakpoint を設定します。
+- **p**(rint) - 現在のコンテキストで式を評価し、値を表示します。 [`pprint`](https://docs.python.org/3/library/pprint.html) を代わりに利用して表示をする、 **pp** コマンドもあります。
+- **r**(eturn) - 現在の関数からリターンするまでプログラムを実行します。
+- **q**(uit) - デバッガーを終了します。
+<!--
 - **l**(ist) - Displays 11 lines around the current line or continue the previous listing.
 - **s**(tep) - Execute the current line, stop at the first possible occasion.
 - **n**(ext) - Continue execution until the next line in the current function is reached or it returns.
 - **b**(reak) - Set a breakpoint (depending on the argument provided).
 - **p**(rint) - Evaluate the expression in the current context and print its value. There's also **pp** to display using [`pprint`](https://docs.python.org/3/library/pprint.html) instead.
 - **r**(eturn) - Continue execution until the current function returns.
-- **q**(uit) - Quit the debugger.
+- **q**(uit) - Quit the debugger. -->
 
-Let's go through an example of using `pdb` to fix the following buggy python code. (See the lecture video).
+`pdb` をつかって、このバグがある Python のコードを直してみましょう（授業のビデオをみてください）。
+
+<!-- Let's go through an example of using `pdb` to fix the following buggy python code. (See the lecture video). -->
 
 ```python
 def bubble_sort(arr):
@@ -171,14 +195,17 @@ def bubble_sort(arr):
 
 print(bubble_sort([4, 2, 1, 8, 7, 6]))
 ```
+Python はインタープリター言語であり、コマンドやプログラムを実行できる `pdb` シェルがあります。
+[`ipdb`](https://pypi.org/project/ipdb/) は改良版の `pdb` で、`pdb` モジュールと同じインターフェースに加えて、タブキーでの予測変換が効く [`IPython`](https://ipython.org) REPL 、シンタックスハイライティング、わかりやすいトレースバック、イントロスペクションなどが使えます。
 
+<!-- Note that since Python is an interpreted language we can use the `pdb` shell to execute commands and to execute instructions.
+[`ipdb`](https://pypi.org/project/ipdb/) is an improved `pdb` that uses the [`IPython`](https://ipython.org) REPL enabling tab completion, syntax highlighting, better tracebacks, and better introspection while retaining the same interface as the `pdb` module. -->
 
-Note that since Python is an interpreted language we can use the `pdb` shell to execute commands and to execute instructions.
-[`ipdb`](https://pypi.org/project/ipdb/) is an improved `pdb` that uses the [`IPython`](https://ipython.org) REPL enabling tab completion, syntax highlighting, better tracebacks, and better introspection while retaining the same interface as the `pdb` module.
+より低いレベルのプログラミングでは [`gdb`](https://www.gnu.org/software/gdb/) （にQoLを高める変更を加えた [`pwndbg`](https://github.com/pwndbg/pwndbg)) や [`lldb`](https://lldb.llvm.org/) ）を検討することでしょう。
+これらは C のような言語のデバッグに最適化されていますが、ほとんどどのようなプロセスでも調査でき、レジスタ、スタック、プログラムカウンタなどのマシンの状態を得ることができるでしょう。
 
-For more low level programming you will probably want to look into [`gdb`](https://www.gnu.org/software/gdb/) (and its quality of life modification [`pwndbg`](https://github.com/pwndbg/pwndbg)) and [`lldb`](https://lldb.llvm.org/).
-They are optimized for C-like language debugging but will let you probe pretty much any process and get its current machine state: registers, stack, program counter, &c.
-
+<!-- For more low level programming you will probably want to look into [`gdb`](https://www.gnu.org/software/gdb/) (and its quality of life modification [`pwndbg`](https://github.com/pwndbg/pwndbg)) and [`lldb`](https://lldb.llvm.org/).
+They are optimized for C-like language debugging but will let you probe pretty much any process and get its current machine state: registers, stack, program counter, &c. -->
 
 ## Specialized Tools
 
