@@ -170,6 +170,7 @@ Here is a brief description of some of the commands `pdb` supports: -->
 - **p**(rint) - 現在のコンテキストで式を評価し、値を表示します。 [`pprint`](https://docs.python.org/3/library/pprint.html) を代わりに利用して表示をする、 **pp** コマンドもあります。
 - **r**(eturn) - 現在の関数からリターンするまでプログラムを実行します。
 - **q**(uit) - デバッガーを終了します。
+
 <!--
 - **l**(ist) - Displays 11 lines around the current line or continue the previous listing.
 - **s**(tep) - Execute the current line, stop at the first possible occasion.
@@ -207,13 +208,20 @@ Python はインタープリター言語であり、コマンドやプログラ�
 <!-- For more low level programming you will probably want to look into [`gdb`](https://www.gnu.org/software/gdb/) (and its quality of life modification [`pwndbg`](https://github.com/pwndbg/pwndbg)) and [`lldb`](https://lldb.llvm.org/).
 They are optimized for C-like language debugging but will let you probe pretty much any process and get its current machine state: registers, stack, program counter, &c. -->
 
-## Specialized Tools
+## 特化したツール
+<!-- ## Specialized Tools -->
 
-Even if what you are trying to debug is a black box binary there are tools that can help you with that.
+たとえデバッグをしようとしている対象がブラックボックスのバイナリーだったとしても、あなたがデバッグをするのを手助けするツールがあります。
+Linux カーネルしかできないようなことをする必要がある場合には、プログラムは [System Calls](https://en.wikipedia.org/wiki/System_call) を使います。
+プログラムが発行したシステムコールを追跡するいくつかのコマンドがあります。 Linuxシステムでは [`strace`](https://www.man7.org/linux/man-pages/man1/strace.1.html) 、macOS や BSD では [`dtrace`](http://dtrace.org/blogs/about/) があります。 `dtrace` は独自の `D` 言語を利用する必要があるため使うのに癖がありますが、 `strace` と似たインターフェースを提供する [`dtruss`](https://www.manpagez.com/man/1/dtruss/) というラッパーがあります（詳細は[こちら](https://8thlight.com/blog/colin-jones/2015/11/06/dtrace-even-better-than-strace-for-osx.html)）。
+
+<!-- Even if what you are trying to debug is a black box binary there are tools that can help you with that.
 Whenever programs need to perform actions that only the kernel can, they use [System Calls](https://en.wikipedia.org/wiki/System_call).
-There are commands that let you trace the syscalls your program makes. In Linux there's [`strace`](https://www.man7.org/linux/man-pages/man1/strace.1.html) and macOS and BSD have [`dtrace`](http://dtrace.org/blogs/about/). `dtrace` can be tricky to use because it uses its own `D` language, but there is a wrapper called [`dtruss`](https://www.manpagez.com/man/1/dtruss/) that provides an interface more similar to `strace` (more details [here](https://8thlight.com/blog/colin-jones/2015/11/06/dtrace-even-better-than-strace-for-osx.html)).
+There are commands that let you trace the syscalls your program makes. In Linux there's [`strace`](https://www.man7.org/linux/man-pages/man1/strace.1.html) and macOS and BSD have [`dtrace`](http://dtrace.org/blogs/about/). `dtrace` can be tricky to use because it uses its own `D` language, but there is a wrapper called [`dtruss`](https://www.manpagez.com/man/1/dtruss/) that provides an interface more similar to `strace` (more details [here](https://8thlight.com/blog/colin-jones/2015/11/06/dtrace-even-better-than-strace-for-osx.html)). -->
 
-Below are some examples of using `strace` or `dtruss` to show [`stat`](https://www.man7.org/linux/man-pages/man2/stat.2.html) syscall traces for an execution of `ls`. For a deeper dive into `strace`, [this](https://blogs.oracle.com/linux/strace-the-sysadmins-microscope-v2) is a good read.
+これは `strace` か `dtruss` をつかって `ls` を実行したときの [`stat`](https://www.man7.org/linux/man-pages/man2/stat.2.html) システムコールを追跡した例です。より深く `strace` について知るためには、 [これ](https://blogs.oracle.com/linux/strace-the-sysadmins-microscope-v2) を読むとよいでしょう。
+
+<!-- Below are some examples of using `strace` or `dtruss` to show [`stat`](https://www.man7.org/linux/man-pages/man2/stat.2.html) syscall traces for an execution of `ls`. For a deeper dive into `strace`, [this](https://blogs.oracle.com/linux/strace-the-sysadmins-microscope-v2) is a good read. -->
 
 ```bash
 # On Linux
@@ -223,15 +231,26 @@ sudo strace -e lstat ls -l > /dev/null
 sudo dtruss -t lstat64_extended ls -l > /dev/null
 ```
 
-Under some circumstances, you may need to look at the network packets to figure out the issue in your program.
-Tools like [`tcpdump`](https://www.man7.org/linux/man-pages/man1/tcpdump.1.html) and [Wireshark](https://www.wireshark.org/) are network packet analyzers that let you read the contents of network packets and filter them based on different criteria.
+状況によっては、あなたのプログラムの問題を理解するためにネットワークパケットを見る必要があるかもしれません。
+ [`tcpdump`](https://www.man7.org/linux/man-pages/man1/tcpdump.1.html) や [Wireshark](https://www.wireshark.org/) のようなツールはネットワークのパケットを分析するソフトウェアで、ネットワークのパケットを読んだり様々な基準でフィルターしたりすることができます。
 
-For web development, the Chrome/Firefox developer tools are quite handy. They feature a large number of tools, including:
-- Source code - Inspect the HTML/CSS/JS source code of any website.
+<!-- Under some circumstances, you may need to look at the network packets to figure out the issue in your program.
+Tools like [`tcpdump`](https://www.man7.org/linux/man-pages/man1/tcpdump.1.html) and [Wireshark](https://www.wireshark.org/) are network packet analyzers that let you read the contents of network packets and filter them based on different criteria. -->
+
+ウェブ開発においては、ChromeやFirefoxの開発者ツールがとても便利です。たくさんの機能がありますが、たとえば：
+- ソースコード - あらゆるサイトの HTML/CSS/JS のソースコードを調査する。
+- 動的な HTML, CSS, JS の変更 - ウェブサイトの中身、スタイルや動作を変えてテストする（ウェブサイトのスクリーンショットが証拠として確実なものではないことがよく分かることでしょう）。
+- Javascript のシェル - JSのREPLでコマンドを実行する。
+- ネットワーク - リクエストのタイムラインを分析する。
+- ストレージ - クッキーやアプリケーションのストレージを見る。
+
+
+<!-- For web development, the Chrome/Firefox developer tools are quite handy. They feature a large number of tools, including: -->
+<!-- - Source code - Inspect the HTML/CSS/JS source code of any website.
 - Live HTML, CSS, JS modification - Change the website content, styles and behavior to test (you can see for yourself that website screenshots are not valid proofs).
 - Javascript shell - Execute commands in the JS REPL.
 - Network - Analyze the requests timeline.
-- Storage - Look into the Cookies and local application storage.
+- Storage - Look into the Cookies and local application storage. -->
 
 ## Static Analysis
 
