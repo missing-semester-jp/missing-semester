@@ -237,7 +237,7 @@ sudo dtruss -t lstat64_extended ls -l > /dev/null
 <!-- Under some circumstances, you may need to look at the network packets to figure out the issue in your program.
 Tools like [`tcpdump`](https://www.man7.org/linux/man-pages/man1/tcpdump.1.html) and [Wireshark](https://www.wireshark.org/) are network packet analyzers that let you read the contents of network packets and filter them based on different criteria. -->
 
-ウェブ開発においては、ChromeやFirefoxの開発者ツールがとても便利です。たくさんの機能がありますが、たとえば：
+ウェブ開発においては、ChromeやFirefoxの開発者ツールがとても便利です。たくさんの機能がありますが、たとえば以下のようなものが含まれています：
 - ソースコード - あらゆるサイトの HTML/CSS/JS のソースコードを調査する。
 - 動的な HTML, CSS, JS の変更 - ウェブサイトの中身、スタイルや動作を変えてテストする（ウェブサイトのスクリーンショットが証拠として確実なものではないことがよく分かることでしょう）。
 - Javascript のシェル - JSのREPLでコマンドを実行する。
@@ -252,15 +252,24 @@ Tools like [`tcpdump`](https://www.man7.org/linux/man-pages/man1/tcpdump.1.html)
 - Network - Analyze the requests timeline.
 - Storage - Look into the Cookies and local application storage. -->
 
-## Static Analysis
+## 静的解析
+<!-- ## Static Analysis -->
 
-For some issues you do not need to run any code.
+いくつかの問題に関しては、コードを実際に走らせる必要は全くありません。。
+たとえば、じっくりコードを読むだけでもループ変数がすでにある変数や関数名を隠している（shadowing）ことや、プログラムが変数を定義する前に読み込んでいることに気づくかもしれません。
+これは、 [静的解析](https://en.wikipedia.org/wiki/Static_program_analysis) ツールが役に立つ分野です。
+静的解析のプログラムはソースコードを入力とし、その正しさを判断するためにコーディング規約に基づいて分析を行います。
+
+以下のパイソンのコードはいくつかの誤りがあります。
+はじめに、ループ変数である `foo` はすでに定義されている関数 `foo` を隠しています。また、最後の行では `bar` ではなく `baz` と書いているので、プログラムは１分間かかる `sleep` を実行したあとにクラッシュしてしまいます。
+
+<!-- For some issues you do not need to run any code.
 For example, just by carefully looking at a piece of code you could realize that your loop variable is shadowing an already existing variable or function name; or that a program reads a variable before defining it.
 Here is where [static analysis](https://en.wikipedia.org/wiki/Static_program_analysis) tools come into play.
 Static analysis programs take source code as input and analyze it using coding rules to reason about its correctness.
 
 In the following Python snippet there are several mistakes.
-First, our loop variable `foo` shadows the previous definition of the function `foo`. We also wrote `baz` instead of `bar` in the last line, so the program will crash after completing the `sleep` call (which will take one minute).
+First, our loop variable `foo` shadows the previous definition of the function `foo`. We also wrote `baz` instead of `bar` in the last line, so the program will crash after completing the `sleep` call (which will take one minute). -->
 
 ```python
 import time
@@ -276,8 +285,11 @@ time.sleep(60)
 print(baz)
 ```
 
-Static analysis tools can identify this kind of issues. When we run [`pyflakes`](https://pypi.org/project/pyflakes) on the code we get the errors related to both bugs. [`mypy`](http://mypy-lang.org/) is another tool that can detect type checking issues. Here, `mypy` will warn us that `bar` is initially an `int` and is then casted to a `float`.
-Again, note that all these issues were detected without having to run the code.
+静的解析ツールはこういった問題を見つけ出すことができます。 [`pyflakes`](https://pypi.org/project/pyflakes) を走らせると両方のバグに関するエラーを確認することができます。また、 [`mypy`](http://mypy-lang.org/) を使うと型チェックをすることができます。この例では、 `mypy` は `bar` ははじめは `int` で初期化されますが、後に `float` にキャストされるという警告を出すでしょう。
+繰り返しになりますが、これらの問題はコードを走らせることなく検出することができます。
+
+<!-- Static analysis tools can identify this kind of issues. When we run [`pyflakes`](https://pypi.org/project/pyflakes) on the code we get the errors related to both bugs. [`mypy`](http://mypy-lang.org/) is another tool that can detect type checking issues. Here, `mypy` will warn us that `bar` is initially an `int` and is then casted to a `float`.
+Again, note that all these issues were detected without having to run the code. -->
 
 ```bash
 $ pyflakes foobar.py
@@ -291,18 +303,31 @@ foobar.py:11: error: Name 'baz' is not defined
 Found 3 errors in 1 file (checked 1 source file)
 ```
 
-In the shell tools lecture we covered [`shellcheck`](https://www.shellcheck.net/), which is a similar tool for shell scripts.
+シェルツールの講義では、シェルスクリプトのための似たようなツールである [`shellcheck`](https://www.shellcheck.net/) を扱いました。
 
-Most editors and IDEs support displaying the output of these tools within the editor itself, highlighting the locations of warnings and errors.
-This is often called **code linting** and it can also be used to display other types of issues such as stylistic violations or insecure constructs.
+<!-- In the shell tools lecture we covered [`shellcheck`](https://www.shellcheck.net/), which is a similar tool for shell scripts. -->
 
-In vim, the plugins [`ale`](https://vimawesome.com/plugin/ale) or [`syntastic`](https://vimawesome.com/plugin/syntastic) will let you do that.
+ほとんどのエディタやIDEでは、それらのツールの出力をエディタ内に表示し、警告やエラーの場所をハイライトする機能をサポートしています。
+これらはよく **code linting** と呼ばれ、コードのスタイル違反や安全でない書き方といったエラーなどを表示するのにも使われます。
+
+<!-- Most editors and IDEs support displaying the output of these tools within the editor itself, highlighting the locations of warnings and errors.
+This is often called **code linting** and it can also be used to display other types of issues such as stylistic violations or insecure constructs. -->
+
+vim では、 [`ale`](https://vimawesome.com/plugin/ale) や [`syntastic`](https://vimawesome.com/plugin/syntastic) といったプラグインで lint を行うことができます。
+Python では、 [`pylint`](https://github.com/PyCQA/pylint) や [`pep8`](https://pypi.org/project/pep8/) がスタイルの linter の代表的なものであり、 [`bandit`](https://pypi.org/project/bandit/)　は一般的なセキュリティーに関する問題を見つけるためのツールです。
+他の言語では、多くの人が便利な静的解析ツールのリストを作成しています。たとえば [Awesome Static Analysis](https://github.com/mre/awesome-static-analysis) (きっとあなたは _Writing_ の章に興味があるでしょう) や、 linter でに関しては [Awesome Linters](https://github.com/caramelomartins/awesome-linters) があります。
+
+<!-- In vim, the plugins [`ale`](https://vimawesome.com/plugin/ale) or [`syntastic`](https://vimawesome.com/plugin/syntastic) will let you do that.
 For Python, [`pylint`](https://github.com/PyCQA/pylint) and [`pep8`](https://pypi.org/project/pep8/) are examples of stylistic linters and [`bandit`](https://pypi.org/project/bandit/) is a tool designed to find common security issues.
-For other languages people have compiled comprehensive lists of useful static analysis tools, such as [Awesome Static Analysis](https://github.com/mre/awesome-static-analysis) (you may want to take a look at the _Writing_ section) and for linters there is [Awesome Linters](https://github.com/caramelomartins/awesome-linters).
+For other languages people have compiled comprehensive lists of useful static analysis tools, such as [Awesome Static Analysis](https://github.com/mre/awesome-static-analysis) (you may want to take a look at the _Writing_ section) and for linters there is [Awesome Linters](https://github.com/caramelomartins/awesome-linters). -->
 
-A complementary tool to stylistic linting are code formatters such as [`black`](https://github.com/psf/black) for Python, `gofmt` for Go, `rustfmt` for Rust or [`prettier`](https://prettier.io/) for JavaScript, HTML and CSS.
+スタイルの linting を行う補助的なツールとして、Python では [`black`](https://github.com/psf/black) 、 Go では `gofmt` 、 Rust では `rustfmt` 、 JavaScript、HTML、CSS では [`prettier`](https://prettier.io/) のようなコードフォーマッターがあります。
+これらのツールは、そのプログラミング言語の一般的なスタイルに合うようにあなたのコードを自動でフォーマットしてくれます。
+あなたはもしかすると自身のコードのスタイルに関して自分でコントロールできないことが気に入らないかもしれませんが、コードの書き方を標準化することは他の人があなたのコードを読むときに助けになりますし、あなたも他の人の（スタイルが標準化されている）コードを読みやすくなるでしょう。
+
+<!-- A complementary tool to stylistic linting are code formatters such as [`black`](https://github.com/psf/black) for Python, `gofmt` for Go, `rustfmt` for Rust or [`prettier`](https://prettier.io/) for JavaScript, HTML and CSS.
 These tools autoformat your code so that it's consistent with common stylistic patterns for the given programming language.
-Although you might be unwilling to give stylistic control about your code, standardizing code format will help other people read your code and will make you better at reading other people's (stylistically standardized) code.
+Although you might be unwilling to give stylistic control about your code, standardizing code format will help other people read your code and will make you better at reading other people's (stylistically standardized) code. -->
 
 # Profiling
 
