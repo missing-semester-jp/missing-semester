@@ -329,43 +329,59 @@ For other languages people have compiled comprehensive lists of useful static an
 These tools autoformat your code so that it's consistent with common stylistic patterns for the given programming language.
 Although you might be unwilling to give stylistic control about your code, standardizing code format will help other people read your code and will make you better at reading other people's (stylistically standardized) code. -->
 
-# Profiling
+# プロファイリング
 
-Even if your code functionally behaves as you would expect, that might not be good enough if it takes all your CPU or memory in the process.
+たとえあなたのコードが期待した動作をしているように振る舞っていたとしても、もしCPUやメモリをすべて使い果たしていたら、それは十分に良いとは言えないかもしれません。
+アルゴリズムの授業ではよく big _O_ 記法を教えますが、あなたのプログラムの中のホットスポットの見つけかたは教えてくれません。
+[早すぎる最適化はすべての悪の元凶 (premature optimization is the root of all evil)](http://wiki.c2.com/?PrematureOptimization) ですから、プロファイラーやモニタリングツールを学ばなければなりません。それのツールはプログラムのどの部分が最も時間やリソースを消費しているかを理解する手助けをしてくれるので、その部分を集中して最適化することができるようになります。
+
+<!-- Even if your code functionally behaves as you would expect, that might not be good enough if it takes all your CPU or memory in the process.
 Algorithms classes often teach big _O_ notation but not how to find hot spots in your programs.
-Since [premature optimization is the root of all evil](http://wiki.c2.com/?PrematureOptimization), you should learn about profilers and monitoring tools. They will help you understand which parts of your program are taking most of the time and/or resources so you can focus on optimizing those parts.
+Since [premature optimization is the root of all evil](http://wiki.c2.com/?PrematureOptimization), you should learn about profilers and monitoring tools. They will help you understand which parts of your program are taking most of the time and/or resources so you can focus on optimizing those parts. -->
 
-## Timing
+## タイミング
+<!-- ## Timing -->
 
-Similarly to the debugging case, in many scenarios it can be enough to just print the time it took your code between two points.
-Here is an example in Python using the [`time`](https://docs.python.org/3/library/time.html) module.
+デバッグのときと同じように、多くのシナリオではコード中の2点における時刻を表示するだけで十分だったりします。
+これは Python で [`time`](https://docs.python.org/3/library/time.html) モジュールを使う例です。
+
+<!-- similarly to the debugging case, in many scenarios it can be enough to just print the time it took your code between two points.
+here is an example in python using the [`time`](https://docs.python.org/3/library/time.html) module. -->
 
 ```python
 import time, random
 n = random.randint(1, 10) * 100
 
-# Get current time
+# 現在時刻の取得
 start = time.time()
 
-# Do some work
+# なんらかの処理
 print("Sleeping for {} ms".format(n))
 time.sleep(n/1000)
 
-# Compute time between start and now
+# start と現在時刻の時間を計算
 print(time.time() - start)
 
-# Output
+# 出力
 # Sleeping for 500 ms
 # 0.5713930130004883
 ```
 
-However, wall clock time can be misleading since your computer might be running other processes at the same time or waiting for events to happen. It is common for tools to make a distinction between _Real_, _User_ and _Sys_ time. In general, _User_ + _Sys_ tells you how much time your process actually spent in the CPU (more detailed explanation [here](https://stackoverflow.com/questions/556405/what-do-real-user-and-sys-mean-in-the-output-of-time1)).
+しかし、実時間は、あなたのコンピューターが同時に他のプロセスを実行していたり、イベントが発生するのを待っていたりする場合に紛らわしい場合があります。ツールが _Real_、 _User_、 _Sys_ 時間を区別するのは一般的なことです。一般的に、 _User_ + _Sys_ はあなたのプロセスが実際に CPU 上で使った時間を表します（より詳細な説明は[こちら](https://stackoverflow.com/questions/556405/what-do-real-user-and-sys-mean-in-the-output-of-time1)）。
 
-- _Real_ - Wall clock elapsed time from start to finish of the program, including the time taken by other processes and time taken while blocked (e.g. waiting for I/O or network)
+- _Real_ - プログラムの最初から最後までに経過した実時間であり、他のプロセスが消費した時間やブロックされていた時間（例： I/O やネットワークを待つ）も含む。
+- _User_ - CPU 上でユーザーコードが走っていた時間
+- _Sys_ - CPU 上でカーネルコードが走っていた時間
+
+<!-- However, wall clock time can be misleading since your computer might be running other processes at the same time or waiting for events to happen. It is common for tools to make a distinction between _Real_, _User_ and _Sys_ time. In general, _User_ + _Sys_ tells you how much time your process actually spent in the CPU (more detailed explanation [here](https://stackoverflow.com/questions/556405/what-do-real-user-and-sys-mean-in-the-output-of-time1)). -->
+
+<!-- - _Real_ - Wall clock elapsed time from start to finish of the program, including the time taken by other processes and time taken while blocked (e.g. waiting for I/O or network)
 - _User_ - Amount of time spent in the CPU running user code
-- _Sys_ - Amount of time spent in the CPU running kernel code
+- _Sys_ - Amount of time spent in the CPU running kernel code -->
 
-For example, try running a command that performs an HTTP request and prefixing it with [`time`](https://www.man7.org/linux/man-pages/man1/time.1.html). Under a slow connection you might get an output like the one below. Here it took over 2 seconds for the request to complete but the process only took 15ms of CPU user time and 12ms of kernel CPU time.
+例えば、 HTTP リクエストを行うコマンドを [`time`](https://www.man7.org/linux/man-pages/man1/time.1.html) と前につけて実行してみましょう。ネットワークが遅い場合には、結果は以下のようなものになるでしょう。ここでは、リクエストが完了するまでに2sかかっていますが、プロセスは 15ms の CPU ユーザー時間と 12ms の CPU カーネル時間しか使っていません。
+
+<!-- For example, try running a command that performs an HTTP request and prefixing it with [`time`](https://www.man7.org/linux/man-pages/man1/time.1.html). Under a slow connection you might get an output like the one below. Here it took over 2 seconds for the request to complete but the process only took 15ms of CPU user time and 12ms of kernel CPU time. -->
 
 ```bash
 $ time curl https://missing.csail.mit.edu &> /dev/null`
@@ -374,15 +390,22 @@ user    0m0.015s
 sys     0m0.012s
 ```
 
-## Profilers
+## プロファイラー
+<!-- ## Profilers -->
 
 ### CPU
 
-Most of the time when people refer to _profilers_ they actually mean _CPU profilers_,  which are the most common.
+人々が _プロファイラー_ と言った際にはほとんどが _CPU プロファイラー_ を指し、これは最も一般的なものです。
+CPU プロファイラには大きく分けて _トレーシング_ プロファイラーと _サンプリング_ プロファイラーという2つのタイプがあります。
+トレーシングプロファイラーはプログラムの中で起こったすべての関数呼び出しを記録する一方で、サンプリングプロファイラはプログラムを定期的に（一般的には1ミリ秒ごとに）調べ、プログラム中のスタックを記録します。
+これらのツールはその記録をつかって、あなたのプログラムがもっとも時間をつかったことに関する統計情報を表示します。
+[これ](https://jvns.ca/blog/2017/12/17/how-do-ruby---python-profilers-work-)は、もしより詳細にこのトピックについて知りたい場合に良い導入のための記事となるでしょう。
+
+<!-- Most of the time when people refer to _profilers_ they actually mean _CPU profilers_,  which are the most common.
 There are two main types of CPU profilers: _tracing_ and _sampling_ profilers.
 Tracing profilers keep a record of every function call your program makes whereas sampling profilers probe your program periodically (commonly every millisecond) and record the program's stack.
 They use these records to present aggregate statistics of what your program spent the most time doing.
-[Here](https://jvns.ca/blog/2017/12/17/how-do-ruby---python-profilers-work-) is a good intro article if you want more detail on this topic.
+[Here](https://jvns.ca/blog/2017/12/17/how-do-ruby---python-profilers-work-) is a good intro article if you want more detail on this topic. -->
 
 Most programming languages have some sort of command line profiler that you can use to analyze your code.
 They often integrate with full fledged IDEs but for this lecture we are going to focus on the command line tools themselves.
