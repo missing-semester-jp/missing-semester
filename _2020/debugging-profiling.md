@@ -141,8 +141,6 @@ Linux カーネルしかできないようなことをする必要がある場�
 
 これは `strace` か `dtruss` をつかって `ls` を実行したときの [`stat`](https://www.man7.org/linux/man-pages/man2/stat.2.html) システムコールを追跡した例です。より深く `strace` について知るためには、 [これ](https://blogs.oracle.com/linux/strace-the-sysadmins-microscope-v2) を読むとよいでしょう。
 
-<!-- Below are some examples of using `strace` or `dtruss` to show [`stat`](https://www.man7.org/linux/man-pages/man2/stat.2.html) syscall traces for an execution of `ls`. For a deeper dive into `strace`, [this](https://blogs.oracle.com/linux/strace-the-sysadmins-microscope-v2) is a good read. -->
-
 ```bash
 # On Linux
 sudo strace -e lstat ls -l > /dev/null
