@@ -513,13 +513,19 @@ Line #  Hits         Time  Per Hit   % Time  Line Contents
 11        24         33.0      1.4      0.0          urls.append(url['href'])
 ```
 
-### Memory
+### メモリー
 
-In languages like C or C++ memory leaks can cause your program to never release memory that it doesn't need anymore.
-To help in the process of memory debugging you can use tools like [Valgrind](https://valgrind.org/) that will help you identify memory leaks.
+C や C++ のような言語では、メモリリークによってあなたのプログラムが必要のないメモリを決して解放しないということがあります。
+メモリーのデバッグを助けるため、メモリリークを検出する [Valgrind](https://valgrind.org/) のようなツールを使うことができます。
 
-In garbage collected languages like Python it is still useful to use a memory profiler because as long as you have pointers to objects in memory they won't be garbage collected.
-Here's an example program and its associated output when running it with [memory-profiler](https://pypi.org/project/memory-profiler/) (note the decorator like in `line-profiler`).
+<!-- In languages like C or C++ memory leaks can cause your program to never release memory that it doesn't need anymore.
+To help in the process of memory debugging you can use tools like [Valgrind](https://valgrind.org/) that will help you identify memory leaks. -->
+
+ガベージコレクションのある Python のような言語でも、オブジェクトへのポインターを持っている限りオブジェクトはガベージコレクションされないので、メモリープロファイラーを利用するのは役に立ちます。
+これは、プログラムの例とそれに対して [memory-profiler](https://pypi.org/project/memory-profiler/) を実行した結果です（`line-profiler` のようにデコレーターを使っていることに注意してください）。
+
+<!-- In garbage collected languages like Python it is still useful to use a memory profiler because as long as you have pointers to objects in memory they won't be garbage collected.
+Here's an example program and its associated output when running it with [memory-profiler](https://pypi.org/project/memory-profiler/) (note the decorator like in `line-profiler`). -->
 
 ```python
 @profile
@@ -545,60 +551,103 @@ Line #    Mem usage  Increment   Line Contents
      8     13.61 MB    0.00 MB       return a
 ```
 
-### Event Profiling
+### イベントプロファイリング
+<!-- ### Event Profiling -->
 
-As it was the case for `strace` for debugging, you might want to ignore the specifics of the code that you are running and treat it like a black box when profiling.
+`strace` をデバッグのために使うような場合に、プロファイリング中にプログラムの一部分を無視し、ブラックボックスのように扱いたいかもしれません。
+[`perf`](https://www.man7.org/linux/man-pages/man1/perf.1.html) コマンドは CPU の差異を抽象化し時間やメモリを報告しませんが、代わりにあなたのプログラムに関係するシステムイベントを報告します。
+例えば、 `perf` を使うことで簡単にキャッシュの局所性が悪いこと、たくさんのページフォルトやロックなどがわかります。以下はコマンドの概要です。
+
+<!-- As it was the case for `strace` for debugging, you might want to ignore the specifics of the code that you are running and treat it like a black box when profiling.
 The [`perf`](https://www.man7.org/linux/man-pages/man1/perf.1.html) command abstracts CPU differences away and does not report time or memory, but instead it reports system events related to your programs.
-For example, `perf` can easily report poor cache locality, high amounts of page faults or livelocks. Here is an overview of the command:
+For example, `perf` can easily report poor cache locality, high amounts of page faults or livelocks. Here is an overview of the command: -->
 
-- `perf list` - List the events that can be traced with perf
+- `perf list` - perf で記録されたイベントの一覧を表示する
+- `perf stat COMMAND ARG1 ARG2` - プロセスやコマンドに関係する異なるイベントの数を得る
+- `perf record COMMAND ARG1 ARG2` - コマンドの実行を記録して、統計データを `perf.data` というファイルに保存する
+- `perf report` -　`perf.data` に記録されたデータを整形して表示する
+
+<!-- - `perf list` - List the events that can be traced with perf
 - `perf stat COMMAND ARG1 ARG2` - Gets counts of different events related a process or command
 - `perf record COMMAND ARG1 ARG2` - Records the run of a command and saves the statistical data into a file called `perf.data`
-- `perf report` - Formats and prints the data collected in `perf.data`
+- `perf report` - Formats and prints the data collected in `perf.data` -->
 
+### 可視化（ Visualization ）
+<!-- ### Visualization -->
 
-### Visualization
+実世界のプログラムからのプロファイラーの出力は、ソフトウェアプロジェクトの元来持つ複雑さにより、大量の情報を含むことでしょう。
+人類は視覚を重視する生物であり、大量の数字を読み取り意味を理解するのは大変苦手です。
+そのため、プロファイラーの出力を理解しやすい形に表示するツールはたくさんあります。
 
-Profiler output for real world programs will contain large amounts of information because of the inherent complexity of software projects.
+<!-- Profiler output for real world programs will contain large amounts of information because of the inherent complexity of software projects.
 Humans are visual creatures and are quite terrible at reading large amounts of numbers and making sense of them.
-Thus there are many tools for displaying profiler's output in an easier to parse way.
+Thus there are many tools for displaying profiler's output in an easier to parse way. -->
 
-One common way to display CPU profiling information for sampling profilers is to use a [Flame Graph](http://www.brendangregg.com/flamegraphs.html), which will display a hierarchy of function calls across the Y axis and time taken proportional to the X axis. They are also interactive, letting you zoom into specific parts of the program and get their stack traces (try clicking in the image below).
+サンプリングプロファイラーからの CPU のプロファイル情報を表示するよくある方法のひとつに、 [Flame Graph](http://www.brendangregg.com/flamegraphs.html) を使うというものがあります。これは、階層的な関数呼び出しを Y 軸に表示し、かかった時間を X 軸に比例するように表示します。これは対話型であり、プログラムの特定の箇所を拡大して、そのスタックトレースを得ることができます（以下の画像をクリックしてみてください）。
+
+<!-- One common way to display CPU profiling information for sampling profilers is to use a [Flame Graph](http://www.brendangregg.com/flamegraphs.html), which will display a hierarchy of function calls across the Y axis and time taken proportional to the X axis. They are also interactive, letting you zoom into specific parts of the program and get their stack traces (try clicking in the image below). -->
 
 [![FlameGraph](http://www.brendangregg.com/FlameGraphs/cpu-bash-flamegraph.svg)](http://www.brendangregg.com/FlameGraphs/cpu-bash-flamegraph.svg)
 
-Call graphs or control flow graphs display the relationships between subroutines within a program by including functions as nodes and functions calls between them as directed edges. When coupled with profiling information such as the number of calls and time taken, call graphs can be quite useful for interpreting the flow of a program.
-In Python you can use the [`pycallgraph`](http://pycallgraph.slowchop.com/en/master/) library to generate them.
+コールグラフ（ Call Graph ）や制御フローグラフ（ Control Flow Graph ）はプログラム中のサブルーチンの関係性を、関数をノード、関数呼び出しを有向エッジとして表示します。呼び出し回数や時間といったプロファイリングの情報とともに扱えば、コールグラフはプログラムの流れを解釈するのに大変役に立ちます。
+Python では、 [`pycallgraph`](http://pycallgraph.slowchop.com/en/master/) ライブラリを利用することでそれらを生成することができます。
+
+<!-- Call graphs or control flow graphs display the relationships between subroutines within a program by including functions as nodes and functions calls between them as directed edges. When coupled with profiling information such as the number of calls and time taken, call graphs can be quite useful for interpreting the flow of a program.
+In Python you can use the [`pycallgraph`](http://pycallgraph.slowchop.com/en/master/) library to generate them. -->
 
 ![Call Graph](https://upload.wikimedia.org/wikipedia/commons/2/2f/A_Call_Graph_generated_by_pycallgraph.png)
 
 
-## Resource Monitoring
+## リソースモニタリング
+<!-- ## Resource Monitoring -->
 
-Sometimes, the first step towards analyzing the performance of your program is to understand what its actual resource consumption is.
+ときには、パフォーマンスを解析するにあたっての最初のステップとして、実際のリソースの消費量がどうなっているかを把握することでしょう。
+プログラムはしばしばリソースが足りないとき、たとえば十分なメモリがなかったりネットワークが遅い場合に遅くなります。
+ CPU 使用率やメモリ消費量、ネットワーク、ディスクの利用量といったいろいろなシステムのリソースを表示するための無数のツールが存在します。
+
+<!-- Sometimes, the first step towards analyzing the performance of your program is to understand what its actual resource consumption is.
 Programs often run slowly when they are resource constrained, e.g. without enough memory or on a slow network connection.
-There are a myriad of command line tools for probing and displaying different system resources like CPU usage, memory usage, network, disk usage and so on.
+There are a myriad of command line tools for probing and displaying different system resources like CPU usage, memory usage, network, disk usage and so on. -->
 
+- **一般的なモニタリング** - おそらく最も有名なものは [`htop`](https://htop.dev/) でしょう。これは改良版の [`top`](https://www.man7.org/linux/man-pages/man1/top.1.html) です。 `htop` はシステム上で実行されているプロセスの様々な統計を表示します。 `htop` は無数のオプションとショートカットキーがあり、有名なものだと `<F6>` でプロセスをソートし、 `t` で階層構造のツリーを表示し、 `h` でスレッドをトグルします。
+[`glances`](https://nicolargo.github.io/glances/) も素晴らしい UI を持つ同じようなツールです。すべてのプロセスをまとめた測定結果を得るには [`dstat`](http://dag.wiee.rs/home-made/dstat/) が気の利くツールであり、 I/O 、ネットワーク、 CPU 消費量、コンテキストスイッチといった様々なサブシステムのたくさんのリソースに関する情報をリアルタイムに計算することができます。
+- **I/O 操作** - [`iotop`](https://www.man7.org/linux/man-pages/man8/iotop.8.html) は現在の I/O の使用量を表示することができ、プロセスが大量の I/O ディスク操作を行っていないか確認するのに便利です。
+- **ディスク使用量** - [`df`](https://www.man7.org/linux/man-pages/man1/df.1.html) はパーティションごとの情報を表示し、 [`du`](http://man7.org/linux/man-pages/man1/du.1.html) はディスク （ **d**isk ）の使用量（ **u**sage ）を現在のディレクトリ内のファイルごとに表示します。これらのツールでは、 `-h` フラグを使うと人間（ **h**uman ）に読みやすい形式で表示することができます。
+`du` のより対話的なバージョンとして、 [`ncdu`](https://dev.yorhel.nl/ncdu) というのもあり、これはフォルダーを移動しながら利用でき、ファイルやフォルダを削除することもできます。
+- **メモリ使用量** - [`free`](https://www.man7.org/linux/man-pages/man1/free.1.html) はシステム内で使われているメモリーや利用できるメモリーの総量を表示します。メモリーは `htop` のようなツールにも表示されています。
+- **使われているファイル** - [`lsof`](https://www.man7.org/linux/man-pages/man8/lsof.8.html) はプロセスによって開かれたファイルについての情報を列挙します。これは、どのプロセスが特定のあるファイルを開いたのか確認するのに大変便利です。
+- **ネットワーク接続と設定** - [`ss`](https://www.man7.org/linux/man-pages/man8/ss.8.html) をつかうと、入ってきたり出ていったりするネットワークパケットやインターフェースに関する統計情報を監視することができます。 `ss` コマンドの一般的な利用法としては、マシンの特定のポートを使っているプロセスが何かを調べるというのがあります。ルーティングやネットワークデバイス、インターフェースを表示するには [`ip`](http://man7.org/linux/man-pages/man8/ip.8.html) コマンドが使えます。 `netstat` や `ifconfig` は、これらのツールがあるため非推奨となりました。
+- **ネットワーク使用量** - [`nethogs`](https://github.com/raboof/nethogs) や [`iftop`](http://www.ex-parrot.com/pdw/iftop/) はネットワーク使用量を監視するための便利な対話的 CLI ツールです。
+
+<!--
 - **General Monitoring** - Probably the most popular is [`htop`](https://htop.dev/), which is an improved version of [`top`](https://www.man7.org/linux/man-pages/man1/top.1.html).
 `htop` presents various statistics for the currently running processes on the system. `htop` has a myriad of options and keybinds, some useful ones  are: `<F6>` to sort processes, `t` to show tree hierarchy and `h` to toggle threads.
-See also [`glances`](https://nicolargo.github.io/glances/) for similar implementation with a great UI. For getting aggregate measures across all processes, [`dstat`](http://dag.wiee.rs/home-made/dstat/) is another nifty tool that computes real-time resource metrics for lots of different subsystems like I/O, networking, CPU utilization, context switches, &c.
-- **I/O operations** - [`iotop`](https://www.man7.org/linux/man-pages/man8/iotop.8.html) displays live I/O usage information and is handy to check if a process is doing heavy I/O disk operations
-- **Disk Usage** - [`df`](https://www.man7.org/linux/man-pages/man1/df.1.html) displays metrics per partitions and [`du`](http://man7.org/linux/man-pages/man1/du.1.html) displays **d**isk **u**sage per file for the current directory. In these tools the `-h` flag tells the program to print with **h**uman readable format.
-A more interactive version of `du` is [`ncdu`](https://dev.yorhel.nl/ncdu) which lets you navigate folders and delete files and folders as you navigate.
-- **Memory Usage** - [`free`](https://www.man7.org/linux/man-pages/man1/free.1.html) displays the total amount of free and used memory in the system. Memory is also displayed in tools like `htop`.
-- **Open Files** - [`lsof`](https://www.man7.org/linux/man-pages/man8/lsof.8.html)  lists file information about files opened by processes. It can be quite useful for checking which process has opened a specific file.
-- **Network Connections and Config** - [`ss`](https://www.man7.org/linux/man-pages/man8/ss.8.html) lets you monitor incoming and outgoing network packets statistics as well as interface statistics. A common use case of `ss` is figuring out what process is using a given port in a machine. For displaying routing, network devices and interfaces you can use [`ip`](http://man7.org/linux/man-pages/man8/ip.8.html). Note that `netstat` and `ifconfig` have been deprecated in favor of the former tools respectively.
-- **Network Usage** -  [`nethogs`](https://github.com/raboof/nethogs) and [`iftop`](http://www.ex-parrot.com/pdw/iftop/) are good interactive CLI tools for monitoring network usage.
+See also [`glances`](https://nicolargo.github.io/glances/) for similar implementation with a great UI. For getting aggregate measures across all processes, [`dstat`](http://dag.wiee.rs/home-made/dstat/) is another nifty tool that computes real-time resource metrics for lots of different subsystems like I/O, networking, CPU utilization, context switches, &c. -->
+<!-- - **I/O operations** - [`iotop`](https://www.man7.org/linux/man-pages/man8/iotop.8.html) displays live I/O usage information and is handy to check if a process is doing heavy I/O disk operations -->
+<!-- - **Disk Usage** - [`df`](https://www.man7.org/linux/man-pages/man1/df.1.html) displays metrics per partitions and [`du`](http://man7.org/linux/man-pages/man1/du.1.html) displays **d**isk **u**sage per file for the current directory. In these tools the `-h` flag tells the program to print with **h**uman readable format.
+A more interactive version of `du` is [`ncdu`](https://dev.yorhel.nl/ncdu) which lets you navigate folders and delete files and folders as you navigate. -->
+<!-- - **Memory Usage** - [`free`](https://www.man7.org/linux/man-pages/man1/free.1.html) displays the total amount of free and used memory in the system. Memory is also displayed in tools like `htop`. -->
+<!-- - **Open Files** - [`lsof`](https://www.man7.org/linux/man-pages/man8/lsof.8.html)  lists file information about files opened by processes. It can be quite useful for checking which process has opened a specific file. -->
+<!-- - **Network Connections and Config** - [`ss`](https://www.man7.org/linux/man-pages/man8/ss.8.html) lets you monitor incoming and outgoing network packets statistics as well as interface statistics. A common use case of `ss` is figuring out what process is using a given port in a machine. For displaying routing, network devices and interfaces you can use [`ip`](http://man7.org/linux/man-pages/man8/ip.8.html). Note that `netstat` and `ifconfig` have been deprecated in favor of the former tools respectively. -->
+<!-- - **Network Usage** -  [`nethogs`](https://github.com/raboof/nethogs) and [`iftop`](http://www.ex-parrot.com/pdw/iftop/) are good interactive CLI tools for monitoring network usage. -->
 
-If you want to test these tools you can also artificially impose loads on the machine using the [`stress`](https://linux.die.net/man/1/stress) command.
+もしこれらのツールをテストしたいなら、 [`stress`](https://linux.die.net/man/1/stress) コマンドを使うことでマシンに人工的な負荷をかけることができます。
+
+<!-- If you want to test these tools you can also artificially impose loads on the machine using the [`stress`](https://linux.die.net/man/1/stress) command. -->
 
 
-### Specialized tools
+### 特化したツール
+<!-- ### Specialized tools -->
 
-Sometimes, black box benchmarking is all you need to determine what software to use.
+ときには、どのソフトウェアを利用するか決めるために、ブラックボックス化されたベンチマークを取ることが必要だったりします。
+[`hyperfine`](https://github.com/sharkdp/hyperfine) のようなツールを使うと、コマンドラインプログラムのベンチマークをすぐに取ることができます。
+例えば、シェルツールとスクリプトの授業で `find` コマンドではなく `fd` コマンドを勧めました。 `hyperfine` をつかって、普段我々がよく実行するタスクについてこれらのツールを比べてみましょう。
+たとえば、以下のサンプルでは `fd` は `find` より私のマシン上で20倍高速でした。
+
+<!-- Sometimes, black box benchmarking is all you need to determine what software to use.
 Tools like [`hyperfine`](https://github.com/sharkdp/hyperfine) let you quickly benchmark command line programs.
 For instance, in the shell tools and scripting lecture we recommended `fd` over `find`. We can use `hyperfine` to compare them in tasks we run often.
-E.g. in the example below `fd` was 20x faster than `find` in my machine.
+E.g. in the example below `fd` was 20x faster than `find` in my machine. -->
 
 ```bash
 $ hyperfine --warmup 3 'fd -e jpg' 'find . -iname "*.jpg"'
@@ -615,18 +664,28 @@ Summary
    21.89 ± 2.33 times faster than 'find . -iname "*.jpg"'
 ```
 
-As it was the case for debugging, browsers also come with a fantastic set of tools for profiling webpage loading, letting you figure out where time is being spent (loading, rendering, scripting, &c).
-More info for [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Performance/Profiling_with_the_Built-in_Profiler) and [Chrome](https://developers.google.com/web/tools/chrome-devtools/rendering-tools).
+デバッグのためには、ブラウザーはウェブページの読み込みをプロファイリングするのに素晴らしいツールとなり、ローディング、レンダリング、スクリプティングなどのどこで時間を使ったのかを理解させてくれるでしょう。
+[Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Performance/Profiling_with_the_Built-in_Profiler) や [Chrome](https://developers.google.com/web/tools/chrome-devtools/rendering-tools) についての詳細は、これらのサイトを参照してください。
 
-# Exercises
+<!-- As it was the case for debugging, browsers also come with a fantastic set of tools for profiling webpage loading, letting you figure out where time is being spent (loading, rendering, scripting, &c).
+More info for [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Performance/Profiling_with_the_Built-in_Profiler) and [Chrome](https://developers.google.com/web/tools/chrome-devtools/rendering-tools). -->
 
-## Debugging
-1. Use `journalctl` on Linux or `log show` on macOS to get the super user accesses and commands in the last day.
-If there aren't any you can execute some harmless commands such as `sudo ls` and check again.
+# 演習
+<!-- # Exercises -->
 
-1. Do [this](https://github.com/spiside/pdb-tutorial) hands on `pdb` tutorial to familiarize yourself with the commands. For a more in depth tutorial read [this](https://realpython.com/python-debugging-pdb).
+## デバッグ
+<!-- ## Debugging -->
 
-1. Install [`shellcheck`](https://www.shellcheck.net/) and try checking the following script. What is wrong with the code? Fix it. Install a linter plugin in your editor so you can get your warnings automatically.
+1. Linux 上で `journalctl` 、もしくは macOS 上で `log show` をつかって最後にスーパーユーザーになって実行したコマンドを取得してください。
+もし何もなければ、害のない `sudo ls` のようなコマンドを実行して再度確認してみてください。
+<!-- 1. Use `journalctl` on Linux or `log show` on macOS to get the super user accesses and commands in the last day.
+If there aren't any you can execute some harmless commands such as `sudo ls` and check again. -->
+
+1. [この](https://github.com/spiside/pdb-tutorial) `pdb` のハンズオンチュートリアルを行い、コマンドに慣れてください。より詳細なチュートリアルとしては、[これ](https://realpython.com/python-debugging-pdb)を読んでみましょう。
+<!-- 1. Do [this](https://github.com/spiside/pdb-tutorial) hands on `pdb` tutorial to familiarize yourself with the commands. For a more in depth tutorial read [this](https://realpython.com/python-debugging-pdb). -->
+
+1. [`shellcheck`](https://www.shellcheck.net/) をインストールし、以下のスクリプトを確認してみてください。このコードの何が間違っているでしょうか？それを修正してみましょう。また、エディタにリンターのプラグインをインストールし、自動的に警告が出るようにしてみましょう。
+<!-- 1. Install [`shellcheck`](https://www.shellcheck.net/) and try checking the following script. What is wrong with the code? Fix it. Install a linter plugin in your editor so you can get your warnings automatically. -->
 
    ```bash
    #!/bin/sh
@@ -638,12 +697,18 @@ If there aren't any you can execute some harmless commands such as `sudo ls` and
    done
    ```
 
-1. (Advanced) Read about [reversible debugging](https://undo.io/resources/reverse-debugging-whitepaper/) and get a simple example working using [`rr`](https://rr-project.org/) or [`RevPDB`](https://morepypy.blogspot.com/2016/07/reverse-debugging-for-python.html).
-## Profiling
+1. （発展）[reversible debugging](https://undo.io/resources/reverse-debugging-whitepaper/) について読み、 [`rr`](https://rr-project.org/) や [`RevPDB`](https://morepypy.blogspot.com/2016/07/reverse-debugging-for-python.html) を使って簡単な例に取り組んでみてください。
 
-1. [Here](/static/files/sorts.py) are some sorting algorithm implementations. Use [`cProfile`](https://docs.python.org/3/library/profile.html) and [`line_profiler`](https://github.com/pyutils/line_profiler) to compare the runtime of insertion sort and quicksort. What is the bottleneck of each algorithm? Use then `memory_profiler` to check the memory consumption, why is insertion sort better? Check now the inplace version of quicksort. Challenge: Use `perf` to look at the cycle counts and cache hits and misses of each algorithm.
+<!-- 1. (Advanced) Read about [reversible debugging](https://undo.io/resources/reverse-debugging-whitepaper/) and get a simple example working using [`rr`](https://rr-project.org/) or [`RevPDB`](https://morepypy.blogspot.com/2016/07/reverse-debugging-for-python.html). -->
+## プロファイリング
+<!-- ## Profiling -->
 
-1. Here's some (arguably convoluted) Python code for computing Fibonacci numbers using a function for each number.
+1. [これ](/static/files/sorts.py) はいくつかのソートアルゴリズムを実装したものです。 [`cProfile`](https://docs.python.org/3/library/profile.html) と [`line_profiler`](https://github.com/pyutils/line_profiler) を使い、挿入ソートとクイックソートの実行時間を比べてみましょう。それぞれのアルゴリズムのボトルネックは何でしょうか。それから `memory_profiler` をつかってメモリー消費量を確認してみましょう。なぜ挿入ソートのほうが良いのでしょうか？それから、インプレースのバージョンのクイックソートを確認してみましょう。　チャレンジ： `perf` を使ってサイクルカウントとキャッシュヒット・ミスをそれぞれのアルゴリズムについて確認してみましょう。
+<!-- 1. [Here](/static/files/sorts.py) are some sorting algorithm implementations. Use [`cProfile`](https://docs.python.org/3/library/profile.html) and [`line_profiler`](https://github.com/pyutils/line_profiler) to compare the runtime of insertion sort and quicksort. What is the bottleneck of each algorithm? Use then `memory_profiler` to check the memory consumption, why is insertion sort better? Check now the inplace version of quicksort. Challenge: Use `perf` to look at the cycle counts and cache hits and misses of each algorithm. -->
+
+1. これは、それぞれの値ごとの関数をつかってフィボナッチ数を求める（あきらかに複雑な） Python のコードです。
+<!--
+1. Here's some (arguably convoluted) Python code for computing Fibonacci numbers using a function for each number. -->
 
    ```python
    #!/usr/bin/env python
@@ -663,13 +728,20 @@ If there aren't any you can execute some harmless commands such as `sudo ls` and
        print(eval("fib9()"))
    ```
 
-   Put the code into a file and make it executable. Install prerequisites: [`pycallgraph`](http://pycallgraph.slowchop.com/en/master/) and [`graphviz`](http://graphviz.org/). (If you can run `dot`, you already have GraphViz.) Run the code as is with `pycallgraph graphviz -- ./fib.py` and check the `pycallgraph.png` file. How many times is `fib0` called?. We can do better than that by memoizing the functions. Uncomment the commented lines and regenerate the images. How many times are we calling each `fibN` function now?
+   このコードをファイルに保存し、実行できるようにしてください。また、事前にこれらをインストールしてください：[`pycallgraph`](http://pycallgraph.slowchop.com/en/master/) 、 [`graphviz`](http://graphviz.org/) (もしすでに `dot` コマンドを実行できるなら、 GraphViz はすでにインストールされています)。 コードをこのコマンドをつかって実行してください。 `pycallgraph graphviz -- ./fib.py` そして `pycallgraph.png` を確認してみましょう。何回 `fib0` は呼ばれましたか？関数をメモ化することでこれより良くできます。コメントになっている部分のコメントを外してもう一度画像を生成してみてください。今回はそれぞれの `fibN` 関数は何回呼ばれているでしょうか？
 
-1. A common issue is that a port you want to listen on is already taken by another process. Let's learn how to discover that process pid. First execute `python -m http.server 4444` to start a minimal web server listening on port `4444`. On a separate terminal run `lsof | grep LISTEN` to print all listening processes and ports. Find that process pid and terminate it by running `kill <PID>`.
+   <!-- Put the code into a file and make it executable. Install prerequisites: [`pycallgraph`](http://pycallgraph.slowchop.com/en/master/) and [`graphviz`](http://graphviz.org/). (If you can run `dot`, you already have GraphViz.) Run the code as is with `pycallgraph graphviz -- ./fib.py` and check the `pycallgraph.png` file. How many times is `fib0` called?. We can do better than that by memoizing the functions. Uncomment the commented lines and regenerate the images. How many times are we calling each `fibN` function now? -->
 
-1. Limiting processes resources can be another handy tool in your toolbox.
+1. リッスンしようとしているポートがすでに他のプロセスに取られていることはよくあります。そのプロセスの pid を見つける方法について学びましょう。最初に、 `python -m http.server 4444` を実行し、 `4444` ポートをリッスンしている最小のウェブサーバーを起動します。異なるターミナルで、 `lsof | grep LISTEN` を実行することですべてのリッスンしているプロセスやポートが表示されます。そのプロセスの pid を見つけ、 `kill <PID>` を実行することで終了させましょう。
+<!-- 1. A common issue is that a port you want to listen on is already taken by another process. Let's learn how to discover that process pid. First execute `python -m http.server 4444` to start a minimal web server listening on port `4444`. On a separate terminal run `lsof | grep LISTEN` to print all listening processes and ports. Find that process pid and terminate it by running `kill <PID>`. -->
+
+1. プロセスのリソースを制限するのは便利なツールとなるかもしれません。 `stress -c 3` を実行し、 `htop` で CPU 使用率を可視化してみましょう。さらに、 `taskset --cpu-list 0,2 stress -c 3` を実行して可視化してみましょう。 `stress` は3つの CPU を使っているでしょうか？なぜ使っていないのでしょう？ [`man taskset`](https://www.man7.org/linux/man-pages/man1/taskset.1.html) を読んでみてください。
+チャレンジ：同じことを [`cgroups`](https://www.man7.org/linux/man-pages/man7/cgroups.7.html) を使ってやってみてください。メモリー消費量を `stress -m` をつかって制限してみてください。
+<!-- 1. Limiting processes resources can be another handy tool in your toolbox.
 Try running `stress -c 3` and visualize the CPU consumption with `htop`. Now, execute `taskset --cpu-list 0,2 stress -c 3` and visualize it. Is `stress` taking three CPUs? Why not? Read [`man taskset`](https://www.man7.org/linux/man-pages/man1/taskset.1.html).
-Challenge: achieve the same using [`cgroups`](https://www.man7.org/linux/man-pages/man7/cgroups.7.html). Try limiting the memory consumption of `stress -m`.
+Challenge: achieve the same using [`cgroups`](https://www.man7.org/linux/man-pages/man7/cgroups.7.html). Try limiting the memory consumption of `stress -m`. -->
 
-1. (Advanced) The command `curl ipinfo.io` performs a HTTP request and fetches information about your public IP. Open [Wireshark](https://www.wireshark.org/) and try to sniff the request and reply packets that `curl` sent and received. (Hint: Use the `http` filter to just watch HTTP packets).
+1. （発展） `curl ipinfo.io` というコマンドは HTTP リクエストを投げ、あなたのパブリック IP に関する情報を取得します。 [Wireshark](https://www.wireshark.org/) を開き、 `curl` が送受信したリクエストや応答のパケットを監視してみましょう。（ヒント： `http` フィルターを使うと HTTP のパケットのみを見ることができます。）
+
+<!-- 1. (Advanced) The command `curl ipinfo.io` performs a HTTP request and fetches information about your public IP. Open [Wireshark](https://www.wireshark.org/) and try to sniff the request and reply packets that `curl` sent and received. (Hint: Use the `http` filter to just watch HTTP packets). -->
 
