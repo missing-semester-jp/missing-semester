@@ -407,10 +407,13 @@ Tracing profilers keep a record of every function call your program makes wherea
 They use these records to present aggregate statistics of what your program spent the most time doing.
 [Here](https://jvns.ca/blog/2017/12/17/how-do-ruby---python-profilers-work-) is a good intro article if you want more detail on this topic. -->
 
-Most programming languages have some sort of command line profiler that you can use to analyze your code.
-They often integrate with full fledged IDEs but for this lecture we are going to focus on the command line tools themselves.
+ほとんどのプログラミング言語は、なんらかのコードを分析するために使えるコマンドライン上のプロファイラーを備えています。
+それらはよく一通りの機能を備えたIDEと合わせて利用されますが、この授業ではコマンドラインツールにフォーカスを当てていきましょう。
+<!-- Most programming languages have some sort of command line profiler that you can use to analyze your code.
+They often integrate with full fledged IDEs but for this lecture we are going to focus on the command line tools themselves. -->
 
-In Python we can use the `cProfile` module to profile time per function call. Here is a simple example that implements a rudimentary grep in Python:
+Python では、 `cProfile` モジュールを関数呼び出しの時間を測定するために利用できます。これは、原始的な grep を Python で実装した簡単な例です。
+<!-- In Python we can use the `cProfile` module to profile time per function call. Here is a simple example that implements a rudimentary grep in Python: -->
 
 ```python
 #!/usr/bin/env python
@@ -434,7 +437,9 @@ if __name__ == '__main__':
             grep(pattern, file)
 ```
 
-We can profile this code using the following command. Analyzing the output we can see that IO is taking most of the time and that compiling the regex takes a fair amount of time as well. Since the regex only needs to be compiled once, we can factor it out of the for.
+このコードを以下のようなコマンドをつかってプロファイルすることができます。出力を分析することで、 IO がほとんどの時間を消費しており、正規表現をコンパイルするのにかなりの時間を使っていることもわかります。正規表現は一度だけコンパイルすればよいため、その部分を for 文から出すことができるでしょう。
+
+<!-- We can profile this code using the following command. Analyzing the output we can see that IO is taking most of the time and that compiling the regex takes a fair amount of time as well. Since the regex only needs to be compiled once, we can factor it out of the for. -->
 
 ```
 $ python -m cProfile -s tottime grep.py 1000 '^(import|\s*def)[^,]*$' *.py
@@ -455,9 +460,12 @@ $ python -m cProfile -s tottime grep.py 1000 '^(import|\s*def)[^,]*$' *.py
 [omitted lines]
 ```
 
+Python の `cProfile` プロファイラーの注意点として（多くのプロファイラーもそうですが）、関数呼び出しごとにかかる時間を表示しているということがあります。これは、特にサードパーティーのライブラリーをコード中で使っている場合に内部の関数呼び出しも結果に含まれてしまうため、あっという間に直感的ではなくなります。
+プロファイリングの情報を表示するのにより直感的な方法は、コードの行ごとにかかった時間を表示する方法であり、 _ラインプロファイラー_ がこれをしてくれます。
 
+<!--
 A caveat of Python's `cProfile` profiler (and many profilers for that matter) is that they display time per function call. That can become unintuitive really fast, especially if you are using third party libraries in your code since internal function calls are also accounted for.
-A more intuitive way of displaying profiling information is to include the time taken per line of code, which is what _line profilers_ do.
+A more intuitive way of displaying profiling information is to include the time taken per line of code, which is what _line profilers_ do. -->
 
 For instance, the following piece of Python code performs a request to the class website and parses the response to get all URLs in the page:
 
