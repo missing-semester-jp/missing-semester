@@ -467,15 +467,16 @@ Python の `cProfile` プロファイラーの注意点として（多くのプ�
 A caveat of Python's `cProfile` profiler (and many profilers for that matter) is that they display time per function call. That can become unintuitive really fast, especially if you are using third party libraries in your code since internal function calls are also accounted for.
 A more intuitive way of displaying profiling information is to include the time taken per line of code, which is what _line profilers_ do. -->
 
-For instance, the following piece of Python code performs a request to the class website and parses the response to get all URLs in the page:
+例えば、この Python コードは授業のウェブサイトにリクエストを投げ、レスポンスを構文解析することでページ内のすべての URL を得ます。
+<!-- For instance, the following piece of Python code performs a request to the class website and parses the response to get all URLs in the page: -->
 
 ```python
 #!/usr/bin/env python
 import requests
 from bs4 import BeautifulSoup
 
-# This is a decorator that tells line_profiler
-# that we want to analyze this function
+# これは、line_profilerにこの関数を
+# 解析するよう伝えるデコレーターです。
 @profile
 def get_urls():
     response = requests.get('https://missing.csail.mit.edu')
@@ -488,7 +489,9 @@ if __name__ == '__main__':
     get_urls()
 ```
 
-If we used Python's `cProfile` profiler we'd get over 2500 lines of output, and even with sorting it'd be hard to understand where the time is being spent. A quick run with [`line_profiler`](https://github.com/pyutils/line_profiler) shows the time taken per line:
+もし Python の `cProfile` プロファイラーを使ったとしたら、2500行を超える、たとえソートしたとしてもどこで時間を使ったのか分かりづらいような出力を得るでしょう。 [`line_profiler`](https://github.com/pyutils/line_profiler) を簡単に走らせれば、行ごとにかかった時間を表示することができます。
+
+<!-- If we used Python's `cProfile` profiler we'd get over 2500 lines of output, and even with sorting it'd be hard to understand where the time is being spent. A quick run with [`line_profiler`](https://github.com/pyutils/line_profiler) shows the time taken per line: -->
 
 ```bash
 $ kernprof -l -v a.py
