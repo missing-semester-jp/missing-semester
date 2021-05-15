@@ -144,7 +144,7 @@ Vim における移動は操作するテキストの断片を参照するため�
 - 行番号： `:{number}<CR>` または `{number}G` (number行へ)
 - その他： `%` （括弧等対応する要素へ）
 - 文字への移動： `f{character}`、`t{character}`、`F{character}`、`T{character}`
-  - 探す　find/to forward/backward {character} on the currentline
+  - 現在の行上で `{character}` を前 (f,t)  / 後 (F,T) に検索し、該当文字の上 (f,F) / 直前の文字 (t,T) に移動する
   - 現在の行において、次の該当文字上へ/該当文字の 1 文字前へ/前の該当文字へ 移動する
   - `,` / `;` マッチした文字を移動する
 - 検索： `/{regex}`、`n` / `N` 正規表現で検索した文字列を前に/後に検索する
