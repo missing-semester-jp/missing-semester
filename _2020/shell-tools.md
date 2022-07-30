@@ -135,7 +135,7 @@ mv *{.py,.sh} folder
 
 
 mkdir foo bar
-# これはfoo/a、foo/b、... foo/h、bar/a、bar/b、... bar/hファイルを生成する
+# これはfoo/a、foo/b、... foo/h、bar/a、bar/b、... bar/hのファイルを生成する
 touch {foo,bar}/{a..h}
 touch foo/x bar/y
 # fooとbarの違いを表示する
