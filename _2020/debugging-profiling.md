@@ -253,7 +253,7 @@ print(time.time() - start)
 例えば、 HTTP リクエストを行うコマンドを [`time`](https://www.man7.org/linux/man-pages/man1/time.1.html) と前につけて実行してみましょう。ネットワークが遅い場合には、結果は以下のようなものになるでしょう。ここでは、リクエストが完了するまでに2sかかっていますが、プロセスは 15ms の CPU ユーザー時間と 12ms の CPU カーネル時間しか使っていません。
 
 ```bash
-$ time curl https://missing.csail.mit.edu &> /dev/null`
+$ time curl https://missing.csail.mit.edu &> /dev/null
 real    0m2.561s
 user    0m0.015s
 sys     0m0.012s
